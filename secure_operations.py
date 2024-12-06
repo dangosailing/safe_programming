@@ -12,7 +12,16 @@ def create_user_table():
            id INTEGER PRIMARY KEY,
            username TEXT NOT NULL UNIQUE,
            password_hash TEXT NOT NULL
-       )            
+       );            
+    """    
+    )
+    cursor.execute("""
+       CREATE TABLE IF NOT EXISTS notes (
+           id INTEGER PRIMARY KEY,
+           user_id INT NOT NULL,
+           note TEXT,
+           FOREIGN KEY (user_id) REFERENCES users(id)
+       );            
     """    
     )
     connection.commit()
@@ -110,4 +119,29 @@ def validate_password(password: str) -> bool:
     # Returns True if all items are True or list is empty, otherwise returns false
     return all([valid_length, has_letter, has_uppercase, has_lowercase, has_digit]) 
 
-def 
+def save_note(note: str, user_id: int):
+    """"Create and store user note in database"""
+    
+    connection = sqlite3.connect("secure_users.db")
+    cursor = connection.cursor()
+    try:
+        query = "INSERT INTO notes (user_id, note) VALUES (?, ?)"
+        cursor.execute(query, (user_id, note))
+        connection.commit()
+        print("Note added succesfully")
+    finally:
+        connection.close()
+        
+def view_notes(user_id: int):
+    """"Fetch and view user notes from database for as specific user"""
+    
+    connection = sqlite3.connect("secure_users.db")
+    cursor = connection.cursor()
+    try:
+        query = "SELECT note FROM users INNER JOIN notes ON users.id = notes.user_id WHERE user_id = ?"
+        cursor.execute(query, [user_id])
+        rows = cursor.fetchall()
+        for row in rows:
+            print(row)
+    finally:
+        connection.close()
