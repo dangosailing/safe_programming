@@ -1,6 +1,7 @@
 import sqlite3
 import bcrypt
 from getpass import getpass
+from Session import Session
 
 # Create a table to store users with hashed passwords
 def create_user_table():
@@ -72,11 +73,10 @@ def login_user():
     result = cursor.fetchone()
             
     if result and bcrypt.checkpw(password.encode("utf-8"), result[0]):
-        user_info = {"username": username, "user_id": result[1]}
-        print("Login successful!")
-        return user_info
+        return {"username": username, "user_id": result[1], "logged_in":True}
     else:
         print("Login failed!")
+        return {"username": None, "user_id": None, "logged_in": False}
     connection.close()
 
 def validate_username(username: str) -> bool:
